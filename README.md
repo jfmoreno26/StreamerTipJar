@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Streamer Tip Jar
 
-## Getting Started
+Fans tip a streamer in USDC on Stellar testnet. A Paiflow deployment splits each tip automatically.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+On Receive (USDC) -> Condition (amount > 50 USDC)
+  TRUE  (over 50)        -> Split: Streamer's Wallet 60% / Staff Salary 25% / Charity Fund 15%
+  FALSE (50 or less)     -> Split: Streamer's Wallet 60% / Staff Salary 40%
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The flow lives in Paiflow, not in this repo. This app prepares the payment, the fan signs it in
+Freighter, and the app submits it to the deployment. `lib/tipjar.ts` only drives the preview text,
+so keep it in sync with the Paiflow nodes if you change the threshold or percentages.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/` landing page that explains how tips are shared
+- `/send` tip form (Freighter wallet on Testnet)
 
-## Learn More
+## Setup
 
-To learn more about Next.js, take a look at the following resources:
+Create `.env.local` (never commit it):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+PAIFLOW_API_TOKEN=pfk_...
+PAIFLOW_DEPLOYMENT_ID=<deployment uuid>
+PAIFLOW_BASE_URL=https://<paiflow host>
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm install
+pnpm dev
+```
 
-## Deploy on Vercel
+## Before demoing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Streamer's Wallet, Staff Salary and Charity Fund each need a USDC trustline and a little testnet XLM.
+- The fan wallet needs testnet USDC and a USDC trustline.
+- Test one tip over 50 USDC (three-way split) and one at or below 50 USDC (two-way split).

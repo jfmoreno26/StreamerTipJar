@@ -1,4 +1,4 @@
-// Stroop math. 1 XLM (or 1 USDC on Stellar) = 10_000_000 stroops. All values are bigint strings.
+// Stroop math. 1 USDC (or 1 XLM) on Stellar = 10_000_000 stroops. All values are bigint strings.
 const SCALE = 7;
 
 export function toStroops(input: string): string {

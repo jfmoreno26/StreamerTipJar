@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { PaiflowError, createPaiflowClient } from "@/lib/billing-paiflow";
-import { mapStatus } from "@/lib/pay";
+import { PaiflowError, createPaiflowClient, mapStatus } from "@/lib/billing-paiflow";
 import { toStroops } from "@/lib/money";
 
 const STELLAR_ADDRESS = /^G[A-Z2-7]{55}$/;
@@ -12,9 +11,10 @@ class SendError extends Error {
   }
 }
 
-// POST { action: "prepare", from, amountXlm } | { action: "submit", signedXdr, preparationRequestId } | { action: "verify", txHash }
-// Same prepare -> sign in Freighter -> submit flow as /api/bills/[id]/pay, but the sender picks the amount.
-// The deployment's condition node decides the split (> 50 XLM) or return to owner.
+// POST { action: "prepare", from, amountUsdc } | { action: "submit", signedXdr, preparationRequestId } | { action: "verify", txHash }
+// Prepare -> sign in Freighter -> submit. The fan picks the tip amount.
+// The Paiflow deployment decides the split: over 50 USDC goes three ways (streamer, staff, charity),
+// 50 USDC or less goes two ways (streamer, staff).
 export async function POST(req: Request) {
   try {
     const b = await req.json().catch(() => null);
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       if (!STELLAR_ADDRESS.test(String(b.from ?? ""))) throw new SendError("Invalid wallet address", 400);
       let amount: string;
       try {
-        amount = toStroops(String(b.amountXlm ?? ""));
+        amount = toStroops(String(b.amountUsdc ?? ""));
       } catch (e: any) {
         throw new SendError(e.message, 400);
       }
