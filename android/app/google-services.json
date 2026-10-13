@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "699461248689",
+    "project_id": "streamertipjar",
+    "storage_bucket": "streamertipjar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699461248689:android:512b890a325633b3bf6490",
+        "android_client_info": {
+          "package_name": "com.example.streamertipjar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJaWWe78qaIwyUuTHlviJhZoY_KIG4asI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
