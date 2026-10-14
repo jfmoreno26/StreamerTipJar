@@ -9,9 +9,7 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const StreamerTipJarApp());
 }
@@ -26,7 +24,11 @@ enum SupporterRank {
   none('New', Colors.grey, Icons.star_border),
   supporter('Supporter', Color(0xFFCD7F32), Icons.star_half_rounded),
   activeSupporter('Active Supporter', Color(0xFFC0C0C0), Icons.star_rounded),
-  topSupporter('Top Supporter', Color(0xFFFFD700), Icons.workspace_premium_rounded);
+  topSupporter(
+    'Top Supporter',
+    Color(0xFFFFD700),
+    Icons.workspace_premium_rounded,
+  );
 
   final String label;
   final Color color;
@@ -218,9 +220,7 @@ class _StreamerTipJarAppState extends State<StreamerTipJarApp> {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       home: StreamBuilder<User?>(
@@ -366,11 +366,8 @@ class _AuthWrapperScreenState extends State<AuthWrapperScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
         await credential.user!.updateDisplayName(username);
@@ -378,10 +375,10 @@ class _AuthWrapperScreenState extends State<AuthWrapperScreen> {
             .collection('users')
             .doc(credential.user!.uid)
             .set({
-          'username': username,
-          'email': email,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+              'username': username,
+              'email': email,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
       }
     } on FirebaseAuthException catch (e) {
       _showSnackBar(e.message ?? 'Registration failed.');
@@ -625,8 +622,9 @@ class _AuthWrapperScreenState extends State<AuthWrapperScreen> {
                     : Icons.visibility_outlined,
               ),
               onPressed: () {
-                setState(() =>
-                    _obscureRegConfirmPass = !_obscureRegConfirmPass);
+                setState(
+                  () => _obscureRegConfirmPass = !_obscureRegConfirmPass,
+                );
               },
             ),
           ),
@@ -677,7 +675,7 @@ class _AuthWrapperScreenState extends State<AuthWrapperScreen> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: primaryBlue.withOpacity(0.12),
+            color: primaryBlue.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -769,11 +767,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController searchController = TextEditingController();
 
   static const List<Map<String, dynamic>> tabs = [
-    {'label': 'Home', 'icon': Icons.home_outlined, 'selectedIcon': Icons.home_rounded},
-    {'label': 'Discover', 'icon': Icons.explore_outlined, 'selectedIcon': Icons.explore_rounded},
-    {'label': 'Wallet', 'icon': Icons.account_balance_wallet_outlined, 'selectedIcon': Icons.account_balance_wallet_rounded},
-    {'label': 'Activity', 'icon': Icons.history_outlined, 'selectedIcon': Icons.history_rounded},
-    {'label': 'Profile', 'icon': Icons.person_outline_rounded, 'selectedIcon': Icons.person_rounded},
+    {
+      'label': 'Home',
+      'icon': Icons.home_outlined,
+      'selectedIcon': Icons.home_rounded,
+    },
+    {
+      'label': 'Discover',
+      'icon': Icons.explore_outlined,
+      'selectedIcon': Icons.explore_rounded,
+    },
+    {
+      'label': 'Wallet',
+      'icon': Icons.account_balance_wallet_outlined,
+      'selectedIcon': Icons.account_balance_wallet_rounded,
+    },
+    {
+      'label': 'Activity',
+      'icon': Icons.history_outlined,
+      'selectedIcon': Icons.history_rounded,
+    },
+    {
+      'label': 'Profile',
+      'icon': Icons.person_outline_rounded,
+      'selectedIcon': Icons.person_rounded,
+    },
   ];
 
   @override
@@ -788,10 +806,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
   }
 
@@ -899,10 +914,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1050),
-                child: IndexedStack(
-                  index: selectedTab,
-                  children: pages,
-                ),
+                child: IndexedStack(index: selectedTab, children: pages),
               ),
             ),
           ),
@@ -913,8 +925,10 @@ class _HomeScreenState extends State<HomeScreen> {
               for (final tab in tabs)
                 NavigationDestination(
                   icon: Icon(tab['icon'] as IconData),
-                  selectedIcon: Icon(tab['selectedIcon'] as IconData,
-                      color: primaryBlue),
+                  selectedIcon: Icon(
+                    tab['selectedIcon'] as IconData,
+                    color: primaryBlue,
+                  ),
                   label: tab['label'] as String,
                 ),
             ],
@@ -925,7 +939,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget dashboard(
-      List<TipActivity> activities, Map<String, double> userTipsByCreator) {
+    List<TipActivity> activities,
+    Map<String, double> userTipsByCreator,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -944,7 +960,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Text(
@@ -973,7 +989,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
               ),
               const SizedBox(height: 22),
@@ -1021,11 +1037,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (compact) {
               return Column(
-                children: [
-                  cards[0],
-                  const SizedBox(height: 12),
-                  cards[1],
-                ],
+                children: [cards[0], const SizedBox(height: 12), cards[1]],
               );
             }
 
@@ -1046,7 +1058,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onAction: () => navigateTo(1),
         ),
         const SizedBox(height: 14),
-        ...creators.take(3).map(
+        ...creators
+            .take(3)
+            .map(
               (creator) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: CreatorCard(
@@ -1169,10 +1183,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Tip amounts are displayed in US dollars. '
                 'The payment page currently accepts USDC.',
-                style: TextStyle(
-                  color: Colors.white,
-                  height: 1.5,
-                ),
+                style: TextStyle(color: Colors.white, height: 1.5),
               ),
             ],
           ),
@@ -1212,7 +1223,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget activity(
-      List<TipActivity> activities, Map<String, double> userTipsByCreator) {
+    List<TipActivity> activities,
+    Map<String, double> userTipsByCreator,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -1227,87 +1240,82 @@ class _HomeScreenState extends State<HomeScreen> {
             description: 'Your verified tip activity will appear here.',
           )
         else
-          ...activities.reversed.map(
-            (item) {
-              final currentTotal = userTipsByCreator[item.creator] ?? 0.0;
-              final rank = SupporterRank.getRankForAmount(currentTotal);
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: const Color(0xFFE8EEFF),
-                        child: Text(
-                          '\$',
-                          style: const TextStyle(
-                            color: primaryBlue,
-                            fontWeight: FontWeight.bold,
-                          ),
+          ...activities.reversed.map((item) {
+            final currentTotal = userTipsByCreator[item.creator] ?? 0.0;
+            final rank = SupporterRank.getRankForAmount(currentTotal);
+            return Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFFE8EEFF),
+                      child: Text(
+                        '\$',
+                        style: const TextStyle(
+                          color: primaryBlue,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.creator,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${item.date.toLocal()}'.split('.').first,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            dollars(item.amount),
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold),
+                            item.creator,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: rank.color.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(rank.icon, size: 12, color: rank.color),
-                                const SizedBox(width: 4),
-                                Text(
-                                  rank.label,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: rank.color,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          Text(
+                            '${item.date.toLocal()}'.split('.').first,
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          dollars(item.amount),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: rank.color.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(rank.icon, size: 12, color: rank.color),
+                              const SizedBox(width: 4),
+                              Text(
+                                rank.label,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: rank.color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
       ],
     );
   }
@@ -1379,7 +1387,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildTierRow(SupporterRank.supporter, '\$1.00 – \$19.99'),
                 const Divider(height: 16),
                 _buildTierRow(
-                    SupporterRank.activeSupporter, '\$20.00 – \$49.99'),
+                  SupporterRank.activeSupporter,
+                  '\$20.00 – \$49.99',
+                ),
                 const Divider(height: 16),
                 _buildTierRow(SupporterRank.topSupporter, '\$50.00+'),
               ],
@@ -1422,10 +1432,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 10),
         Text(
           rank.label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: rank.color,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: rank.color),
         ),
         const Spacer(),
         Text(
@@ -1440,10 +1447,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final uri = Uri.parse('http://localhost:3000/send');
 
     try {
-      final opened = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
       if (!mounted) return;
 
@@ -1460,7 +1464,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> showTipDialog(
-      String creatorName, Map<String, double> userTipsByCreator) async {
+    String creatorName,
+    Map<String, double> userTipsByCreator,
+  ) async {
     final amountController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     const presets = [1, 5, 20, 50];
@@ -1489,8 +1495,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           Row(
                             children: [
                               const Text('Current Rank: '),
-                              Icon(currentRank.icon,
-                                  size: 16, color: currentRank.color),
+                              Icon(
+                                currentRank.icon,
+                                size: 16,
+                                color: currentRank.color,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 currentRank.label,
@@ -1523,8 +1532,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: amountController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
@@ -1658,10 +1666,7 @@ class SectionHeading extends StatelessWidget {
           ),
         ),
         if (actionLabel != null)
-          TextButton(
-            onPressed: onAction,
-            child: Text(actionLabel!),
-          ),
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],
     );
   }
@@ -1691,10 +1696,7 @@ class StatCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 29,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 29, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
@@ -1770,14 +1772,13 @@ class CreatorCard extends StatelessWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: rank.color.withOpacity(0.15),
+                                color: rank.color.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(rank.icon,
-                                      size: 13, color: rank.color),
+                                  Icon(rank.icon, size: 13, color: rank.color),
                                   const SizedBox(width: 4),
                                   Text(
                                     rank.label,
@@ -1797,9 +1798,7 @@ class CreatorCard extends StatelessWidget {
                         creator.username,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 7),
@@ -1827,10 +1826,7 @@ class CreatorCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 13),
-            Text(
-              creator.description,
-              style: const TextStyle(height: 1.5),
-            ),
+            Text(creator.description, style: const TextStyle(height: 1.5)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 16,
@@ -1871,29 +1867,19 @@ class EmptyState extends StatelessWidget {
   final String title;
   final String description;
 
-  const EmptyState({
-    super.key,
-    required this.title,
-    required this.description,
-  });
+  const EmptyState({super.key, required this.title, required this.description});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 36,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
         child: Column(
           children: [
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
