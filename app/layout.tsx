@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Streamer Tip Jar",
-  description: "Tip a streamer in USDC. The tip is automatically split between the streamer, their staff and a charity.",
+  title: "JarJar Payments",
+  description: "Tip your favorite JarJar creators in USDC through PaiFlow.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

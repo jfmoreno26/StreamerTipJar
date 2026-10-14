@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Profile written at registration.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // One document per lowercased username, so usernames stay unique.
+    // Readable before sign-up so the app can check if a name is taken.
+    match /usernames/{name} {
+      allow get: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    // Tips are written only by the PaiFlow server (lib/tip-records.ts), which
+    // creates one when a payment is submitted and updates it once verified.
+    // The app only reads its own tips.
+    match /tips/{tipId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if request.resource.data.keys()
+          .hasOnly(['userId', 'creator', 'amount', 'status', 'date', 'txHash', 'paidAt'])
+        && request.resource.data.userId is string
+        && request.resource.data.creator is string
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.status in ['Pending', 'Success', 'Failed'];
+
+      // Only an unfinished tip's status can change; who, whom and how much cannot.
+      allow update: if resource.data.status == 'Pending'
+        && request.resource.data.status in ['Pending', 'Success', 'Failed']
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'date', 'txHash', 'paidAt']);
+    }
+  }
+}

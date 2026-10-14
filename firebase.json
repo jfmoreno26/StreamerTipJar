@@ -1,1 +1,64 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"streamertipjar","appId":"1:699461248689:android:512b890a325633b3bf6490","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"streamertipjar","configurations":{"android":"1:699461248689:android:512b890a325633b3bf6490","ios":"1:699461248689:ios:e7c59add174a144bbf6490","macos":"1:699461248689:ios:e7c59add174a144bbf6490","web":"1:699461248689:web:f844d85ed310be58bf6490","windows":"1:699461248689:web:318435bdbae2814cbf6490"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": "hosting",
+    "cleanUrls": true,
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
+        ]
+      },
+      {
+        "source": "/email/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=86400"
+          }
+        ]
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "streamertipjar",
+          "appId": "1:699461248689:android:512b890a325633b3bf6490",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "streamertipjar",
+          "configurations": {
+            "android": "1:699461248689:android:512b890a325633b3bf6490",
+            "ios": "1:699461248689:ios:e7c59add174a144bbf6490",
+            "macos": "1:699461248689:ios:e7c59add174a144bbf6490",
+            "web": "1:699461248689:web:f844d85ed310be58bf6490",
+            "windows": "1:699461248689:web:318435bdbae2814cbf6490"
+          }
+        }
+      }
+    }
+  }
+}

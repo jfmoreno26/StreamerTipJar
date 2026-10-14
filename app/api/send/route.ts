@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PaiflowError, createPaiflowClient, mapStatus } from "@/lib/billing-paiflow";
 import { toStroops } from "@/lib/money";
+import { parseTip, recordTip } from "@/lib/tip-records";
 
 const STELLAR_ADDRESS = /^G[A-Z2-7]{55}$/;
 const UUID = /^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
@@ -11,7 +12,8 @@ class SendError extends Error {
   }
 }
 
-// POST { action: "prepare", from, amountUsdc } | { action: "submit", signedXdr, preparationRequestId } | { action: "verify", txHash }
+// POST { action: "prepare", from, amountUsdc } | { action: "submit", signedXdr, preparationRequestId, tip? } | { action: "verify", txHash, tip? }
+// With tip info (opened from the JarJar app), the payment is recorded in that user's tip history.
 // Prepare -> sign in Freighter -> submit. The fan picks the tip amount.
 // The Paiflow deployment decides the split: over 50 USDC goes three ways (streamer, staff, charity),
 // 50 USDC or less goes two ways (streamer, staff).
@@ -36,11 +38,17 @@ export async function POST(req: Request) {
       const prepId = b.preparationRequestId ?? null;
       if (prepId != null && !UUID.test(prepId)) throw new SendError("Invalid preparation id", 400);
       const r = await paiflow.submit(b.signedXdr, prepId);
-      return NextResponse.json({ status: mapStatus(r.status), txHash: r.txHash });
+      const status = mapStatus(r.status);
+      const tip = parseTip(b.tip);
+      if (tip) await recordTip(tip, status, r.txHash);
+      return NextResponse.json({ status, txHash: r.txHash });
     }
     if (b.action === "verify") {
       const r = await paiflow.lookup(String(b.txHash ?? ""));
-      return NextResponse.json({ status: mapStatus(r.status), txHash: b.txHash });
+      const status = mapStatus(r.status);
+      const tip = parseTip(b.tip);
+      if (tip) await recordTip(tip, status, String(b.txHash));
+      return NextResponse.json({ status, txHash: b.txHash });
     }
     throw new SendError("Unknown action", 422);
   } catch (e: any) {

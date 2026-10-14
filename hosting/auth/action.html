@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>JarJar Account</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/neon.css">
+</head>
+<body>
+  <div class="space" aria-hidden="true">
+    <svg class="planet" viewBox="0 0 200 200"><use href="#planet"/></svg>
+  </div>
+
+  <main class="shell">
+    <a class="brand" href="/" aria-label="JarJar home">
+      <span class="logo"><svg viewBox="0 0 24 24"><use href="#jar"/></svg></span>
+      <span class="brand-name">JarJar</span>
+    </a>
+
+    <section class="card" id="card" aria-live="polite">
+      <!-- Loading -->
+      <div data-view="loading">
+        <div class="spinner" role="status" aria-label="Checking your link"></div>
+        <p class="muted center">Checking your link…</p>
+      </div>
+
+      <!-- Reset password form -->
+      <form data-view="reset" hidden novalidate>
+        <div class="icon-badge" aria-hidden="true">🔒</div>
+        <h1 class="title">Choose a new password</h1>
+        <p class="muted center">for <strong id="reset-email" class="text"></strong></p>
+
+        <label class="field">
+          <span>New password</span>
+          <span class="input-wrap">
+            <input id="password" type="password" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="reveal" data-target="password" aria-label="Show password">Show</button>
+          </span>
+        </label>
+        <div class="meter" aria-hidden="true"><span id="meter-bar"></span></div>
+        <p class="hint" id="meter-label">Use at least 8 characters with a mix of letters, numbers and symbols.</p>
+
+        <label class="field">
+          <span>Confirm new password</span>
+          <span class="input-wrap">
+            <input id="confirm" type="password" autocomplete="new-password" required>
+            <button type="button" class="reveal" data-target="confirm" aria-label="Show password">Show</button>
+          </span>
+        </label>
+
+        <p class="error" id="form-error" role="alert" hidden></p>
+        <button class="glow-button" id="submit" type="submit">Update password</button>
+      </form>
+
+      <!-- Result (success or error) -->
+      <div data-view="result" hidden>
+        <div class="icon-badge" id="result-icon" aria-hidden="true">✓</div>
+        <h1 class="title" id="result-title"></h1>
+        <p class="muted center" id="result-text"></p>
+        <a class="glow-button" id="result-action" hidden></a>
+      </div>
+    </section>
+
+    <p class="footnote">JarJar · Creator support platform<br>Never share your password or wallet recovery phrase with anyone.</p>
+  </main>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="ring" x1="0" x2="1"><stop offset="0" stop-color="#B98CFF"/><stop offset=".5" stop-color="#FFC89A"/><stop offset="1" stop-color="#FF4FD8"/></linearGradient>
+      <radialGradient id="body" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFE6D3"/><stop offset=".55" stop-color="#FFC89A"/><stop offset="1" stop-color="#FF4FD8"/></radialGradient>
+      <symbol id="planet" viewBox="0 0 200 200">
+        <g transform="rotate(-22 100 100)">
+          <path d="M20 100a80 24 0 0 1 160 0" fill="none" stroke="url(#ring)" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="50" fill="url(#body)"/>
+          <ellipse cx="100" cy="86" rx="60" ry="7" fill="#fff" opacity=".16"/>
+          <path d="M180 100a80 24 0 0 1-160 0" fill="none" stroke="url(#ring)" stroke-width="9" stroke-linecap="round"/>
+        </g>
+      </symbol>
+      <symbol id="jar" viewBox="0 0 24 24">
+        <rect x="6.2" y="1" width="11.6" height="3.4" rx="1.2" fill="#fff"/>
+        <path d="M8.2 5.3h7.6v1.4c3.7 1.2 5.3 2.9 5.3 5.8v7.2c0 1.9-1.5 3.3-3.3 3.3H6.2c-1.8 0-3.3-1.4-3.3-3.3v-7.2c0-2.9 1.6-4.6 5.3-5.8z" fill="#fff"/>
+        <circle cx="12" cy="15.4" r="3.8" fill="#FFD54F"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, verifyPasswordResetCode, confirmPasswordReset, checkActionCode, applyActionCode,
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode");
+    const oobCode = params.get("oobCode");
+    // Remove the one-time code from the address bar and history.
+    history.replaceState(null, "", location.pathname);
+
+    const auth = getAuth(initializeApp({
+      apiKey: params.get("apiKey") || "AIzaSyCeMu-rPdesK7NEhgCoF0PGRVFIECJKPWI",
+      authDomain: "streamertipjar.firebaseapp.com",
+      projectId: "streamertipjar",
+    }));
+
+    const $ = (id) => document.getElementById(id);
+    function show(view) {
+      document.querySelectorAll("[data-view]").forEach((el) => { el.hidden = el.dataset.view !== view; });
+    }
+    function result({ ok, title, text, actionLabel, actionHref }) {
+      $("result-icon").textContent = ok ? "✓" : "!";
+      $("result-icon").classList.toggle("bad", !ok);
+      $("result-title").textContent = title;
+      $("result-text").textContent = text;
+      const action = $("result-action");
+      action.hidden = !actionLabel;
+      if (actionLabel) { action.textContent = actionLabel; action.href = actionHref; }
+      show("result");
+    }
+
+    const LINK_ERRORS = {
+      "auth/expired-action-code": "This link has expired. Request a new one from the JarJar app.",
+      "auth/invalid-action-code": "This link is invalid or has already been used. Request a new one from the JarJar app.",
+      "auth/user-disabled": "This account has been disabled. Contact support for help.",
+      "auth/user-not-found": "We couldn't find this account. It may have been deleted.",
+    };
+    const linkError = (e) => result({
+      ok: false,
+      title: "This link can't be used",
+      text: LINK_ERRORS[e.code] || "Something went wrong. Please request a new link from the JarJar app.",
+    });
+
+    // Password strength: 0–4.
+    function strength(pw) {
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.length >= 12) score++;
+      if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+      if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+      return pw.length < 8 ? Math.min(score, 1) : score;
+    }
+    const LEVELS = [
+      ["Too short — use at least 8 characters.", "#FF3B6B"],
+      ["Weak — add more variety.", "#FF3B6B"],
+      ["Okay — longer is stronger.", "#FFD54F"],
+      ["Strong password.", "#3DF2FF"],
+      ["Very strong password.", "#3DF2FF"],
+    ];
+    $("password").addEventListener("input", (e) => {
+      const s = strength(e.target.value);
+      $("meter-bar").style.width = `${Math.max(s, 0.5) * 25}%`;
+      $("meter-bar").style.background = LEVELS[s][1];
+      $("meter-label").textContent = e.target.value ? LEVELS[s][0] : "Use at least 8 characters with a mix of letters, numbers and symbols.";
+    });
+
+    document.querySelectorAll(".reveal").forEach((btn) => btn.addEventListener("click", () => {
+      const input = $(btn.dataset.target);
+      const hidden = input.type === "password";
+      input.type = hidden ? "text" : "password";
+      btn.textContent = hidden ? "Hide" : "Show";
+      btn.setAttribute("aria-label", hidden ? "Hide password" : "Show password");
+    }));
+
+    async function handleReset() {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      $("reset-email").textContent = email;
+      show("reset");
+      $("password").focus();
+
+      document.querySelector("[data-view=reset]").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const pw = $("password").value;
+        const err = $("form-error");
+        err.hidden = true;
+        if (pw.length < 8) { err.textContent = "Your password needs at least 8 characters."; err.hidden = false; return; }
+        if (pw !== $("confirm").value) { err.textContent = "The passwords don't match."; err.hidden = false; return; }
+
+        $("submit").disabled = true;
+        $("submit").textContent = "Updating…";
+        try {
+          await confirmPasswordReset(auth, oobCode, pw);
+          result({
+            ok: true,
+            title: "Password updated",
+            text: `You can now sign in to JarJar as ${email} with your new password.`,
+          });
+        } catch (e) {
+          if (e.code === "auth/weak-password") {
+            err.textContent = "That password is too weak. Try a longer one.";
+            err.hidden = false;
+            $("submit").disabled = false;
+            $("submit").textContent = "Update password";
+          } else {
+            linkError(e);
+          }
+        }
+      });
+    }
+
+    async function handleVerifyEmail() {
+      await applyActionCode(auth, oobCode);
+      result({ ok: true, title: "Email verified", text: "Thanks! Your email address is confirmed. You can go back to JarJar." });
+    }
+
+    async function handleRecoverEmail() {
+      const info = await checkActionCode(auth, oobCode);
+      await applyActionCode(auth, oobCode);
+      result({
+        ok: true,
+        title: "Email address restored",
+        text: `Your sign-in email has been changed back to ${info.data.email}. If you didn't request the change, reset your password in the JarJar app right away.`,
+      });
+    }
+
+    const handlers = { resetPassword: handleReset, verifyEmail: handleVerifyEmail, recoverEmail: handleRecoverEmail };
+    if (!oobCode || !handlers[mode]) {
+      result({ ok: false, title: "Link not recognised", text: "Open the link exactly as it appears in your JarJar email." });
+    } else {
+      handlers[mode]().catch(linkError);
+    }
+  </script>
+</body>
+</html>

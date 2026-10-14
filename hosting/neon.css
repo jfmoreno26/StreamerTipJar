@@ -1,0 +1,255 @@
+/* JarJar neon look for the hosted pages; mirrors lib/neon.dart. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0718;
+  --bg-alt: #1b0f3d;
+  --surface: #140e2bE0;
+  --surface-raised: #1e1641;
+  --border: #342a60;
+  --text: #f4f0ff;
+  --muted: #a99dcf;
+  --purple: #9146ff;
+  --violet: #b98cff;
+  --pink: #ff4fd8;
+  --cyan: #3df2ff;
+  --gold: #ffd54f;
+  --live: #ff3b6b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  color: var(--text);
+}
+/* Background only on html, so .space (z-index: -1) shows above it. */
+html { background: linear-gradient(var(--bg), var(--bg-alt)) fixed; }
+
+/* Stars and neon haze */
+.space {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 0%, #9146ff38, transparent 70%),
+    radial-gradient(ellipse 50% 45% at 100% 80%, #ff4fd830, transparent 70%);
+}
+.space::before, .space::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff9, transparent),
+    radial-gradient(1px 1px at 28% 72%, #fff8, transparent),
+    radial-gradient(1.5px 1.5px at 45% 30%, #fffa, transparent),
+    radial-gradient(1px 1px at 63% 12%, #fff7, transparent),
+    radial-gradient(2px 2px at 78% 56%, #fff9, transparent),
+    radial-gradient(1px 1px at 88% 24%, #fff8, transparent),
+    radial-gradient(1.5px 1.5px at 35% 90%, #fff7, transparent),
+    radial-gradient(1px 1px at 92% 88%, #fff9, transparent),
+    radial-gradient(1px 1px at 6% 60%, #fff8, transparent);
+  background-size: 420px 420px;
+}
+.space::after {
+  background-size: 300px 300px;
+  background-position: 120px 80px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity: .25; } to { opacity: .9; } }
+
+.planet {
+  position: absolute;
+  right: -90px;
+  bottom: -70px;
+  width: min(420px, 70vw);
+  filter: drop-shadow(0 0 40px #ff4fd860);
+  animation: float 9s ease-in-out infinite alternate;
+}
+@keyframes float { to { transform: translateY(-14px) rotate(2deg); } }
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 32px 16px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+.logo {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  box-shadow: 0 0 26px #9146ff90;
+}
+.logo svg { width: 30px; height: 30px; }
+.brand-name, .gradient-text {
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--violet), var(--pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-name { font-size: 28px; }
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 40px -6px #9146ff55, 0 24px 60px #0007;
+  animation: rise .45s cubic-bezier(.2, .8, .2, 1);
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+
+.title {
+  margin: 14px 0 6px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.muted { color: var(--muted); line-height: 1.55; }
+.center { text-align: center; }
+.text { color: var(--text); }
+
+.icon-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  box-shadow: 0 0 28px #ff4fd880;
+}
+.icon-badge.bad { background: var(--live); box-shadow: 0 0 28px #ff3b6b90; }
+
+.field { display: block; margin-top: 18px; }
+.field > span:first-child {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.input-wrap { position: relative; display: block; }
+input {
+  width: 100%;
+  padding: 15px 70px 15px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px #9146ff40; }
+.reveal {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--violet);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.meter {
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 5px;
+  background: var(--border);
+  overflow: hidden;
+}
+.meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 5px;
+  transition: width .25s, background .25s;
+}
+.hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+.error {
+  margin: 16px 0 0;
+  padding: 11px 13px;
+  border: 1px solid #ff3b6b80;
+  border-radius: 12px;
+  background: #ff3b6b18;
+  color: #ffc0cf;
+  font-size: 13px;
+}
+
+.glow-button {
+  display: block;
+  width: 100%;
+  margin-top: 22px;
+  padding: 15px 18px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--purple), var(--pink));
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 18px #9146ff70;
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+}
+.glow-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 26px #ff4fd890; }
+.glow-button:disabled { opacity: .55; cursor: progress; }
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 10px auto 14px;
+  border: 4px solid var(--border);
+  border-top-color: var(--pink);
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.footnote {
+  max-width: 440px;
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
