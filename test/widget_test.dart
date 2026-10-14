@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:streamertipjar/main.dart';
+import 'package:streamertipjar/auth_screen.dart';
+import 'package:streamertipjar/models.dart';
 import 'package:streamertipjar/neon.dart';
 
 // JarJarApp and HomeScreen need a live Firebase connection, so these tests
@@ -80,6 +81,17 @@ void main() {
       expect(tip.creator, '');
       expect(tip.amount, 0.0);
       expect(tip.status, tipPending);
+      expect(tip.txHash, isNull);
+      expect(tip.explorerUrl, isNull);
+    });
+
+    test('keeps only valid transaction hashes', () {
+      final hash = 'a' * 64;
+      final tip = TipActivity.fromFirestore({'txHash': hash});
+
+      expect(tip.txHash, hash);
+      expect(tip.explorerUrl.toString(), contains('/tx/$hash'));
+      expect(TipActivity.fromFirestore({'txHash': 'not-a-hash'}).txHash, isNull);
     });
   });
 
