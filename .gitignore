@@ -40,7 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Flutter/Dart generated files (machine-specific, rebuilt by `flutter pub get`)
 .dart_tool/
-.flutter-plugins-dependencies
-.firebase/
