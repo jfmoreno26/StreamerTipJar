@@ -12,11 +12,6 @@ class SendError extends Error {
   }
 }
 
-// POST { action: "prepare", from, amountUsdc } | { action: "submit", signedXdr, preparationRequestId, tip? } | { action: "verify", txHash, tip? }
-// With tip info (opened from the JarJar app), the payment is recorded in that user's tip history.
-// Prepare -> sign in Freighter -> submit. The fan picks the tip amount.
-// The Paiflow deployment decides the split: over 50 USDC goes three ways (streamer, staff, charity),
-// 50 USDC or less goes two ways (streamer, staff).
 export async function POST(req: Request) {
   try {
     const b = await req.json().catch(() => null);

@@ -1,14 +1,10 @@
 import "server-only";
-// Thin server-only client for the Paiflow deployment API, following the quickstart's upstream() helper.
-// Endpoints: POST execute, POST execute/submit, GET transactions/{hash}, GET events?txHash=
-// Named billing-paiflow.ts so it does not collide with the starter's own lib/paiflow.ts.
 
-/** Paiflow SUCCESS and FAILED are final. REJECTED means the submission was refused (never on-chain). Everything else is uncertain. */
 export function mapStatus(s: string): "SUCCESS" | "FAILED" | "PENDING" {
   const v = s.toUpperCase();
   if (v === "SUCCESS") return "SUCCESS";
   if (v === "FAILED" || v === "REJECTED") return "FAILED";
-  return "PENDING"; // PENDING, UNKNOWN, anything unexpected: keep checking the same transaction
+  return "PENDING";
 }
 
 export interface Prepared {

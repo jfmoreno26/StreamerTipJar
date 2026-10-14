@@ -1,8 +1,4 @@
 import "server-only";
-// Records PaiFlow payments in the JarJar app's tip history (Firestore tips/{id}), through the Firestore REST API.
-// The app opens /send?creator=...&userId=...; the payment page sends that tip info with submit/verify,
-// and this creates the tip when the payment is submitted and updates its status once verified.
-// Firestore rules (firestore.rules) limit what these unauthenticated writes may contain.
 
 const STATUS = {
   SUCCESS: "Success",
@@ -17,7 +13,6 @@ export interface TipInfo {
   amountUsd: number;
 }
 
-/** Validates the tip info sent by the payment page; returns null when absent or malformed. */
 export function parseTip(value: unknown): TipInfo | null {
   if (!value || typeof value !== "object") return null;
   const t = value as Record<string, unknown>;
@@ -56,7 +51,6 @@ export async function recordTip(
   if (txHash) fields.txHash = { stringValue: txHash };
   if (status === "SUCCESS") fields.paidAt = { timestampValue: now };
 
-  // PATCH with an update mask creates the document on submit and updates it on later checks.
   const params = new URLSearchParams({ key: apiKey });
   for (const name of Object.keys(fields)) params.append("updateMask.fieldPaths", name);
 

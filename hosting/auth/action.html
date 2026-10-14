@@ -21,13 +21,11 @@
     </a>
 
     <section class="card" id="card" aria-live="polite">
-      <!-- Loading -->
       <div data-view="loading">
         <div class="spinner" role="status" aria-label="Checking your link"></div>
         <p class="muted center">Checking your link…</p>
       </div>
 
-      <!-- Reset password form -->
       <form data-view="reset" hidden novalidate>
         <div class="icon-badge" aria-hidden="true">🔒</div>
         <h1 class="title">Choose a new password</h1>
@@ -41,7 +39,12 @@
           </span>
         </label>
         <div class="meter" aria-hidden="true"><span id="meter-bar"></span></div>
-        <p class="hint" id="meter-label">Use at least 8 characters with a mix of letters, numbers and symbols.</p>
+        <p class="hint strength" id="meter-label"></p>
+        <ul class="rules">
+          <li id="rule-length">At least 8 characters</li>
+          <li id="rule-upper">One uppercase letter</li>
+          <li id="rule-symbol">One symbol (e.g. ! @ # $)</li>
+        </ul>
 
         <label class="field">
           <span>Confirm new password</span>
@@ -55,7 +58,6 @@
         <button class="glow-button" id="submit" type="submit">Update password</button>
       </form>
 
-      <!-- Result (success or error) -->
       <div data-view="result" hidden>
         <div class="icon-badge" id="result-icon" aria-hidden="true">✓</div>
         <h1 class="title" id="result-title"></h1>
@@ -96,7 +98,6 @@
     const params = new URLSearchParams(location.search);
     const mode = params.get("mode");
     const oobCode = params.get("oobCode");
-    // Remove the one-time code from the address bar and history.
     history.replaceState(null, "", location.pathname);
 
     const auth = getAuth(initializeApp({
@@ -132,27 +133,35 @@
       text: LINK_ERRORS[e.code] || "Something went wrong. Please request a new link from the JarJar app.",
     });
 
-    // Password strength: 0–4.
+    const RULES = [
+      ["rule-length", (pw) => pw.length >= 8],
+      ["rule-upper", (pw) => /[A-Z]/.test(pw)],
+      ["rule-symbol", (pw) => /[^A-Za-z0-9\s]/.test(pw)],
+    ];
+    const meetsRules = (pw) => RULES.every(([, test]) => test(pw));
     function strength(pw) {
-      let score = 0;
-      if (pw.length >= 8) score++;
+      if (!pw) return 0;
+      let score = RULES.filter(([, test]) => test(pw)).length;
+      if (/\d/.test(pw) && /[a-z]/.test(pw)) score++;
       if (pw.length >= 12) score++;
-      if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
-      if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
-      return pw.length < 8 ? Math.min(score, 1) : score;
+      return Math.max(1, Math.min(score, 5));
     }
     const LEVELS = [
-      ["Too short — use at least 8 characters.", "#FF3B6B"],
-      ["Weak — add more variety.", "#FF3B6B"],
-      ["Okay — longer is stronger.", "#FFD54F"],
-      ["Strong password.", "#3DF2FF"],
-      ["Very strong password.", "#3DF2FF"],
+      ["", "#342a60"],
+      ["Weak", "#FF3B6B"],
+      ["Fair", "#FFD54F"],
+      ["Good", "#FFD54F"],
+      ["Strong", "#3DF2FF"],
+      ["Very strong", "#3DF2FF"],
     ];
     $("password").addEventListener("input", (e) => {
-      const s = strength(e.target.value);
-      $("meter-bar").style.width = `${Math.max(s, 0.5) * 25}%`;
+      const pw = e.target.value;
+      const s = strength(pw);
+      $("meter-bar").style.width = `${s * 20}%`;
       $("meter-bar").style.background = LEVELS[s][1];
-      $("meter-label").textContent = e.target.value ? LEVELS[s][0] : "Use at least 8 characters with a mix of letters, numbers and symbols.";
+      $("meter-label").textContent = pw ? `Password strength: ${LEVELS[s][0]}` : "";
+      $("meter-label").style.color = LEVELS[s][1];
+      for (const [id, test] of RULES) $(id).classList.toggle("met", test(pw));
     });
 
     document.querySelectorAll(".reveal").forEach((btn) => btn.addEventListener("click", () => {
@@ -174,7 +183,7 @@
         const pw = $("password").value;
         const err = $("form-error");
         err.hidden = true;
-        if (pw.length < 8) { err.textContent = "Your password needs at least 8 characters."; err.hidden = false; return; }
+        if (!meetsRules(pw)) { err.textContent = "Your password needs at least 8 characters, an uppercase letter and a symbol."; err.hidden = false; return; }
         if (pw !== $("confirm").value) { err.textContent = "The passwords don't match."; err.hidden = false; return; }
 
         $("submit").disabled = true;

@@ -43,11 +43,9 @@ function SendTipForm() {
     creatorParam?.trim().slice(0, 100) || "your favorite creator"
   );
 
-  // Set when opened from the JarJar app: the user whose tip history gets this payment.
   const userIdParam = searchParams.get("userId");
   const userId = userIdParam && /^[A-Za-z0-9]{1,128}$/.test(userIdParam) ? userIdParam : null;
 
-  // The creator's @handle, used for the same profile picture the app shows.
   const handleParam = searchParams.get("handle");
   const handle = handleParam && /^@?[A-Za-z0-9_.]{1,40}$/.test(handleParam) ? handleParam : null;
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -66,7 +64,6 @@ function SendTipForm() {
     signedXdr: string;
     preparationRequestId: string | null;
   } | null>(null);
-  // The JarJar tip record for the current transaction; one per signed payment.
   const tip = useRef<{
     id: string;
     userId: string;
@@ -258,7 +255,6 @@ function SendTipForm() {
   return (
     <main className="payment-shell">
       <style jsx global>{`
-        /* Matches the JarJar app's neon look (lib/neon.dart). */
         :root {
           color-scheme: dark;
           --pf-bg: #0b0718;
@@ -279,12 +275,10 @@ function SendTipForm() {
 
         * { box-sizing: border-box; }
 
-        /* Background only on html, so .pf-space (z-index: -1) shows above it. */
         html {
           background: linear-gradient(var(--pf-bg), var(--pf-bg-alt)) fixed;
         }
 
-        /* "html body" outranks globals.css, whose solid body background would hide the stars. */
         html body {
           margin: 0;
           min-height: 100%;
@@ -300,7 +294,6 @@ function SendTipForm() {
           outline-offset: 3px;
         }
 
-        /* Stars, neon haze and a floating planet */
         .pf-space {
           position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
           background:
@@ -677,7 +670,6 @@ function SendTipForm() {
                 <div className="pf-avatar">
                   <div className="pf-avatar-inner">
                     {handle && !avatarFailed ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={`https://api.dicebear.com/9.x/adventurer/png?seed=${encodeURIComponent(handle)}&size=160`}
                         alt=""

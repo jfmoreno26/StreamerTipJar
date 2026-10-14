@@ -1,5 +1,3 @@
-// JarJar's neon design system: palette, theme, space background, and the
-// shared glowing widgets (cards, avatars, buttons, badges, logo).
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -22,7 +20,6 @@ class Neon {
   );
 }
 
-/// Colours that follow light/dark mode.
 class NeonColors {
   final Color background;
   final Color backgroundAlt;
@@ -32,7 +29,6 @@ class NeonColors {
   final Color text;
   final Color muted;
 
-  /// How strong glows are; light mode keeps them soft.
   final double glow;
 
   const NeonColors({
@@ -74,18 +70,19 @@ class NeonColors {
 
 ThemeData buildNeonTheme(Brightness brightness) {
   final c = brightness == Brightness.dark ? NeonColors.dark : NeonColors.light;
-  final scheme = ColorScheme.fromSeed(
-    seedColor: Neon.purple,
-    brightness: brightness,
-  ).copyWith(
-    primary: Neon.purple,
-    onPrimary: Colors.white,
-    secondary: Neon.pink,
-    surface: c.surface,
-    onSurface: c.text,
-    onSurfaceVariant: c.muted,
-    outline: c.border,
-  );
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: Neon.purple,
+        brightness: brightness,
+      ).copyWith(
+        primary: Neon.purple,
+        onPrimary: Colors.white,
+        secondary: Neon.pink,
+        surface: c.surface,
+        onSurface: c.text,
+        onSurfaceVariant: c.muted,
+        outline: c.border,
+      );
   final rounded14 = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(14),
   );
@@ -149,7 +146,9 @@ ThemeData buildNeonTheme(Brightness brightness) {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: brightness == Brightness.dark ? Neon.violet : Neon.purple,
+        foregroundColor: brightness == Brightness.dark
+            ? Neon.violet
+            : Neon.purple,
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
     ),
@@ -215,24 +214,22 @@ ThemeData buildNeonTheme(Brightness brightness) {
   );
 }
 
-/// Lets mouse and trackpad drag lists too, so carousels scroll on desktop.
 class NeonScrollBehavior extends MaterialScrollBehavior {
   const NeonScrollBehavior();
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-        PointerDeviceKind.stylus,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) =>
       const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
 }
 
-/// Deep-space gradient with stars and soft neon glows behind a page.
 class NeonBackground extends StatelessWidget {
   final Widget child;
   const NeonBackground({super.key, required this.child});
@@ -268,42 +265,60 @@ class _StarfieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Neon haze in two corners.
     void haze(Offset center, double radius, Color color) {
       canvas.drawCircle(
         center,
         radius,
         Paint()
           ..shader = RadialGradient(
-            colors: [color.withValues(alpha: 0.22 * colors.glow), color.withValues(alpha: 0)],
+            colors: [
+              color.withValues(alpha: 0.22 * colors.glow),
+              color.withValues(alpha: 0),
+            ],
           ).createShader(Rect.fromCircle(center: center, radius: radius)),
       );
     }
 
     haze(Offset(size.width * 0.1, 0), size.shortestSide * 0.8, Neon.purple);
-    haze(Offset(size.width, size.height * 0.75), size.shortestSide * 0.7, Neon.pink);
+    haze(
+      Offset(size.width, size.height * 0.75),
+      size.shortestSide * 0.7,
+      Neon.pink,
+    );
 
-    // Fixed seed so stars don't jump around between frames.
     final random = math.Random(42);
     final starColor = colors.glow >= 1 ? Colors.white : Neon.purple;
     final count = (size.width * size.height / 9000).clamp(40, 220).toInt();
     final dot = Paint();
     for (var i = 0; i < count; i++) {
-      final p = Offset(random.nextDouble() * size.width, random.nextDouble() * size.height);
-      dot.color = starColor.withValues(alpha: 0.15 + random.nextDouble() * 0.45);
+      final p = Offset(
+        random.nextDouble() * size.width,
+        random.nextDouble() * size.height,
+      );
+      dot.color = starColor.withValues(
+        alpha: 0.15 + random.nextDouble() * 0.45,
+      );
       canvas.drawCircle(p, 0.4 + random.nextDouble() * 1.2, dot);
     }
     for (var i = 0; i < count ~/ 14; i++) {
-      final p = Offset(random.nextDouble() * size.width, random.nextDouble() * size.height);
-      drawSparkle(canvas, p, 3 + random.nextDouble() * 4, starColor.withValues(alpha: 0.5));
+      final p = Offset(
+        random.nextDouble() * size.width,
+        random.nextDouble() * size.height,
+      );
+      drawSparkle(
+        canvas,
+        p,
+        3 + random.nextDouble() * 4,
+        starColor.withValues(alpha: 0.5),
+      );
     }
   }
 
   @override
-  bool shouldRepaint(_StarfieldPainter oldDelegate) => oldDelegate.colors != colors;
+  bool shouldRepaint(_StarfieldPainter oldDelegate) =>
+      oldDelegate.colors != colors;
 }
 
-/// Four-point twinkle star.
 void drawSparkle(Canvas canvas, Offset c, double r, Color color) {
   final path = Path()
     ..moveTo(c.dx, c.dy - r)
@@ -315,7 +330,6 @@ void drawSparkle(Canvas canvas, Offset c, double r, Color color) {
   canvas.drawPath(path, Paint()..color = color);
 }
 
-/// Ringed planet with a neon glow.
 class PlanetPainter extends CustomPainter {
   final Color body;
   final Color bodyShade;
@@ -343,14 +357,17 @@ class PlanetPainter extends CustomPainter {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(-0.38);
-    final ringRect = Rect.fromCenter(center: Offset.zero, width: r * 3.2, height: r * 0.95);
+    final ringRect = Rect.fromCenter(
+      center: Offset.zero,
+      width: r * 3.2,
+      height: r * 0.95,
+    );
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = r * 0.17
       ..strokeCap = StrokeCap.round
       ..shader = LinearGradient(colors: ring).createShader(ringRect);
 
-    // Back half of the ring, then the planet, then the front half over it.
     canvas.drawArc(ringRect, math.pi, math.pi, false, ringPaint);
 
     final planet = Rect.fromCircle(center: Offset.zero, radius: r);
@@ -367,8 +384,22 @@ class PlanetPainter extends CustomPainter {
     canvas.save();
     canvas.clipPath(Path()..addOval(planet));
     final band = Paint()..color = Colors.white.withValues(alpha: 0.16);
-    canvas.drawOval(Rect.fromCenter(center: Offset(0, -r * 0.3), width: r * 2.4, height: r * 0.28), band);
-    canvas.drawOval(Rect.fromCenter(center: Offset(0, r * 0.25), width: r * 2.4, height: r * 0.18), band);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(0, -r * 0.3),
+        width: r * 2.4,
+        height: r * 0.28,
+      ),
+      band,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(0, r * 0.25),
+        width: r * 2.4,
+        height: r * 0.18,
+      ),
+      band,
+    );
     canvas.restore();
 
     canvas.drawArc(ringRect, 0, math.pi, false, ringPaint);
@@ -380,21 +411,36 @@ class PlanetPainter extends CustomPainter {
       oldDelegate.body != body || oldDelegate.bodyShade != bodyShade;
 }
 
-/// Sparkles that gently twinkle; used on hero banners.
 class TwinkleField extends StatefulWidget {
-  final List<Offset> points; // fractions of the box, 0..1
+  final List<Offset> points;
   final Color color;
-  const TwinkleField({super.key, required this.points, this.color = Colors.white});
+  const TwinkleField({
+    super.key,
+    required this.points,
+    this.color = Colors.white,
+  });
 
   @override
   State<TwinkleField> createState() => _TwinkleFieldState();
 }
 
-class _TwinkleFieldState extends State<TwinkleField> with SingleTickerProviderStateMixin {
+class _TwinkleFieldState extends State<TwinkleField>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 3),
-  )..repeat();
+    value: 0.25,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
 
   @override
   void dispose() {
@@ -417,7 +463,8 @@ class _TwinklePainter extends CustomPainter {
   final List<Offset> points;
   final Color color;
 
-  _TwinklePainter(this.animation, this.points, this.color) : super(repaint: animation);
+  _TwinklePainter(this.animation, this.points, this.color)
+    : super(repaint: animation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -425,7 +472,12 @@ class _TwinklePainter extends CustomPainter {
       final phase = (animation.value + i / points.length) * 2 * math.pi;
       final t = (math.sin(phase) + 1) / 2;
       final p = Offset(points[i].dx * size.width, points[i].dy * size.height);
-      drawSparkle(canvas, p, 4 + t * 4, color.withValues(alpha: 0.35 + t * 0.6));
+      drawSparkle(
+        canvas,
+        p,
+        4 + t * 4,
+        color.withValues(alpha: 0.35 + t * 0.6),
+      );
     }
   }
 
@@ -433,7 +485,6 @@ class _TwinklePainter extends CustomPainter {
   bool shouldRepaint(_TwinklePainter oldDelegate) => false;
 }
 
-/// Glowing card that lifts and lights up on hover.
 class NeonCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -476,12 +527,16 @@ class _NeonCardState extends State<NeonCard> {
             color: c.surface.withValues(alpha: c.glow >= 1 ? 0.88 : 1),
             borderRadius: radius,
             border: Border.all(
-              color: _hovered ? widget.accent.withValues(alpha: 0.85) : c.border,
+              color: _hovered
+                  ? widget.accent.withValues(alpha: 0.85)
+                  : c.border,
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.accent.withValues(alpha: (_hovered ? 0.35 : 0.12) * c.glow),
+                color: widget.accent.withValues(
+                  alpha: (_hovered ? 0.35 : 0.12) * c.glow,
+                ),
                 blurRadius: _hovered ? 28 : 18,
                 spreadRadius: -4,
               ),
@@ -504,7 +559,6 @@ class _NeonCardState extends State<NeonCard> {
   }
 }
 
-/// Gradient button with a neon glow.
 class GlowButton extends StatefulWidget {
   final String label;
   final IconData? icon;
@@ -567,7 +621,9 @@ class _GlowButtonState extends State<GlowButton> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: firstColor.withValues(alpha: (_hovered ? 0.6 : 0.35) * glow),
+              color: firstColor.withValues(
+                alpha: (_hovered ? 0.6 : 0.35) * glow,
+              ),
               blurRadius: _hovered ? 24 : 14,
               offset: const Offset(0, 4),
             ),
@@ -589,7 +645,6 @@ class _GlowButtonState extends State<GlowButton> {
   }
 }
 
-/// Text filled with the brand gradient.
 class GradientText extends StatelessWidget {
   final String text;
   final TextStyle style;
@@ -608,13 +663,13 @@ class GradientText extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => gradient.createShader(Offset.zero & bounds.size),
+      shaderCallback: (bounds) =>
+          gradient.createShader(Offset.zero & bounds.size),
       child: Text(text, style: style, textAlign: textAlign),
     );
   }
 }
 
-/// Round profile picture with a neon ring; falls back to initials.
 class NeonAvatar extends StatelessWidget {
   final String initials;
   final Color color;
@@ -651,7 +706,11 @@ class NeonAvatar extends StatelessWidget {
 
     Widget picture = fallback;
     if (imageBytes != null) {
-      picture = Image.memory(imageBytes!, fit: BoxFit.cover, gaplessPlayback: true);
+      picture = Image.memory(
+        imageBytes!,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      );
     } else if (imageUrl != null) {
       picture = Image.network(
         imageUrl!,
@@ -709,6 +768,66 @@ class NeonAvatar extends StatelessWidget {
   }
 }
 
+class VerifiedBadge extends StatelessWidget {
+  final double size;
+  const VerifiedBadge({super.key, this.size = 18});
+
+  static const color = Color(0xFF0866FF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Verified creator',
+      child: Semantics(
+        label: 'Verified creator',
+        child: CustomPaint(
+          size: Size.square(size),
+          painter: const _VerifiedPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+class _VerifiedPainter extends CustomPainter {
+  const _VerifiedPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide / 2;
+
+    const bumps = 12;
+    final rim = Path();
+    for (var i = 0; i <= 360; i++) {
+      final a = i * math.pi / 180;
+      final r = radius * (0.9 + 0.1 * math.cos(bumps * a));
+      final p = center + Offset(math.cos(a), math.sin(a)) * r;
+      i == 0 ? rim.moveTo(p.dx, p.dy) : rim.lineTo(p.dx, p.dy);
+    }
+    rim.close();
+    canvas.drawPath(rim, Paint()..color = VerifiedBadge.color);
+
+    final w = size.width;
+    final check = Path()
+      ..moveTo(w * 0.29, w * 0.52)
+      ..lineTo(w * 0.44, w * 0.66)
+      ..lineTo(w * 0.72, w * 0.37);
+    canvas.drawPath(
+      check,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = w * 0.11
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_VerifiedPainter oldDelegate) => false;
+}
+
 class LiveBadge extends StatelessWidget {
   final bool small;
   const LiveBadge({super.key, this.small = false});
@@ -716,7 +835,10 @@ class LiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: small ? 5 : 8, vertical: small ? 1 : 3),
+      padding: EdgeInsets.symmetric(
+        horizontal: small ? 5 : 8,
+        vertical: small ? 1 : 3,
+      ),
       decoration: BoxDecoration(
         color: Neon.live,
         borderRadius: BorderRadius.circular(6),
@@ -737,13 +859,17 @@ class LiveBadge extends StatelessWidget {
   }
 }
 
-/// Small neon pill label.
 class NeonPill extends StatelessWidget {
   final String label;
   final Color color;
   final IconData? icon;
 
-  const NeonPill({super.key, required this.label, this.color = Neon.purple, this.icon});
+  const NeonPill({
+    super.key,
+    required this.label,
+    this.color = Neon.purple,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -765,7 +891,11 @@ class NeonPill extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: fg,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -773,7 +903,6 @@ class NeonPill extends StatelessWidget {
   }
 }
 
-/// App logo: a jar with a coin on a glowing gradient tile.
 class JarJarLogo extends StatelessWidget {
   final double size;
   const JarJarLogo({super.key, this.size = 36});
@@ -797,7 +926,10 @@ class JarJarLogo extends StatelessWidget {
       child: Center(
         child: CustomPaint(
           size: Size.square(size * 0.66),
-          painter: const _JarPainter(jarColor: Colors.white, coinColor: Neon.gold),
+          painter: const _JarPainter(
+            jarColor: Colors.white,
+            coinColor: Neon.gold,
+          ),
         ),
       ),
     );
@@ -816,7 +948,6 @@ class _JarPainter extends CustomPainter {
     final h = size.height;
     final jarPaint = Paint()..color = jarColor;
 
-    // Lid
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(w * 0.26, h * 0.04, w * 0.48, h * 0.14),
@@ -825,7 +956,6 @@ class _JarPainter extends CustomPainter {
       jarPaint,
     );
 
-    // Neck, shoulders and body
     final body = Path()
       ..moveTo(w * 0.34, h * 0.22)
       ..lineTo(w * 0.66, h * 0.22)
@@ -840,8 +970,11 @@ class _JarPainter extends CustomPainter {
       ..close();
     canvas.drawPath(body, jarPaint);
 
-    // Coin
-    canvas.drawCircle(Offset(w * 0.5, h * 0.64), w * 0.16, Paint()..color = coinColor);
+    canvas.drawCircle(
+      Offset(w * 0.5, h * 0.64),
+      w * 0.16,
+      Paint()..color = coinColor,
+    );
   }
 
   @override
@@ -849,7 +982,6 @@ class _JarPainter extends CustomPainter {
       oldDelegate.jarColor != jarColor || oldDelegate.coinColor != coinColor;
 }
 
-/// Section title with a neon accent bar.
 class SectionHeading extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -882,7 +1014,10 @@ class SectionHeading extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(4),
             boxShadow: [
-              BoxShadow(color: Neon.pink.withValues(alpha: 0.6 * c.glow), blurRadius: 10),
+              BoxShadow(
+                color: Neon.pink.withValues(alpha: 0.6 * c.glow),
+                blurRadius: 10,
+              ),
             ],
           ),
         ),
@@ -911,18 +1046,22 @@ class SectionHeading extends StatelessWidget {
   }
 }
 
-/// Cross-fades and slightly slides between tabs while keeping each tab's state.
 class FadeIndexedStack extends StatefulWidget {
   final int index;
   final List<Widget> children;
 
-  const FadeIndexedStack({super.key, required this.index, required this.children});
+  const FadeIndexedStack({
+    super.key,
+    required this.index,
+    required this.children,
+  });
 
   @override
   State<FadeIndexedStack> createState() => _FadeIndexedStackState();
 }
 
-class _FadeIndexedStackState extends State<FadeIndexedStack> with SingleTickerProviderStateMixin {
+class _FadeIndexedStackState extends State<FadeIndexedStack>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 280),
@@ -950,7 +1089,10 @@ class _FadeIndexedStackState extends State<FadeIndexedStack> with SingleTickerPr
     return FadeTransition(
       opacity: _curve,
       child: SlideTransition(
-        position: Tween(begin: const Offset(0, 0.02), end: Offset.zero).animate(_curve),
+        position: Tween(
+          begin: const Offset(0, 0.02),
+          end: Offset.zero,
+        ).animate(_curve),
         child: IndexedStack(index: widget.index, children: widget.children),
       ),
     );

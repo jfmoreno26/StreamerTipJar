@@ -3,22 +3,62 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Profile written at registration.
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // One document per lowercased username, so usernames stay unique.
-    // Readable before sign-up so the app can check if a name is taken.
     match /usernames/{name} {
       allow get: if true;
       allow create: if request.auth != null
         && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
     }
 
-    // Tips are written only by the PaiFlow server (lib/tip-records.ts), which
-    // creates one when a payment is submitted and updates it once verified.
-    // The app only reads its own tips.
+    match /creators/{creatorId} {
+      function creatorPath() {
+        return /databases/$(database)/documents/creators/$(creatorId);
+      }
+
+      function followerPath() {
+        return /databases/$(database)/documents/creators/$(creatorId)/followers/$(request.auth.uid);
+      }
+
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['followers'])
+        && request.resource.data.followers == 1
+        && !exists(followerPath())
+        && existsAfter(followerPath());
+
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followers'])
+        && (
+          (request.resource.data.followers == resource.data.followers + 1
+            && !exists(followerPath())
+            && existsAfter(followerPath()))
+          || (request.resource.data.followers == resource.data.followers - 1
+            && exists(followerPath())
+            && !existsAfter(followerPath()))
+        );
+
+      match /followers/{uid} {
+        allow read: if true;
+
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['at'])
+          && getAfter(creatorPath()).data.followers
+            == (exists(creatorPath()) ? get(creatorPath()).data.followers : 0) + 1;
+
+        allow delete: if request.auth != null
+          && request.auth.uid == uid
+          && getAfter(creatorPath()).data.followers
+            == get(creatorPath()).data.followers - 1;
+      }
+    }
+
     match /tips/{tipId} {
       allow read: if request.auth != null
         && resource.data.userId == request.auth.uid;
@@ -31,7 +71,6 @@ service cloud.firestore {
         && request.resource.data.amount > 0
         && request.resource.data.status in ['Pending', 'Success', 'Failed'];
 
-      // Only an unfinished tip's status can change; who, whom and how much cannot.
       allow update: if resource.data.status == 'Pending'
         && request.resource.data.status in ['Pending', 'Success', 'Failed']
         && request.resource.data.diff(resource.data).affectedKeys()
